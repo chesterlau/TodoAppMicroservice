@@ -1,0 +1,69 @@
+trigger:
+  - master
+
+pool:
+  name: Azure Pipelines
+  vmImage: 'ubuntu-20.04'
+  
+variables:
+  BuildConfiguration: 'release'
+
+stages:
+    - stage: Test
+      displayName: 'Test'
+      jobs:
+      - job: RunScripts
+        steps:
+            - task: DotNetCoreCLI@2
+              displayName: 'dotnet test'
+              inputs:
+                command: test
+                projects: '**/tests/**/*.csproj'
+                arguments: '--configuration $(BuildConfiguration) --collect "XPlat Code coverage" -- RunConfiguration.DisableAppDomain=true'
+                
+            - script: |
+                dotnet tool install dotnet-reportgenerator-globaltool --tool-path .   
+                ./reportgenerator -reports:$(Agent.TempDirectory)/**/coverage.cobertura.xml -targetdir:$(Build.SourcesDirectory) -reporttypes:"Cobertura"
+              displayName: 'Generate code coverage'
+              
+            - task: PublishCodeCoverageResults@1
+              displayName: 'Publish code coverage'
+              inputs:
+                codeCoverageTool: Cobertura
+                summaryFileLocation: ./Cobertura.xml
+
+    - stage: Build
+      displayName: 'Build and push image'
+      jobs:
+      - job: RunScripts
+        steps:
+            - task: Docker@1
+              displayName: 'Build an image'
+              inputs:
+                azureSubscriptionEndpoint: '$(azureSubscriptionEndpoint)'
+                azureContainerRegistry: '$(azureContainerRegistry)'
+                includeLatestTag: true
+                useDefaultContext: false
+                buildContext: '$(Build.SourcesDirectory)'
+                
+            - task: Docker@1
+              displayName: 'Push an image'
+              inputs:
+                azureSubscriptionEndpoint: '$(azureSubscriptionEndpoint)'
+                azureContainerRegistry: '$(azureContainerRegistry)'
+                command: 'Push an image'
+                
+    - stage: Deploy
+      displayName: 'Deploy Dev'
+      jobs:
+      - job: RunScripts
+        steps:
+            - task: AzureRmWebAppDeployment@4
+              displayName: 'Azure App Service Deploy: ethereumtransactionsearch'
+              inputs:
+                azureSubscription: '$(azureSubscriptionEndpoint)'
+                appType: webAppContainer
+                WebAppName: ethereumtransactionsearch
+                DockerNamespace: '$(azureContainerRegistry)'
+                DockerRepository: '$(azureContainerRepository)'
+                DockerImageTag: '$(Build.BuildId)'
