@@ -52,3 +52,19 @@ stages:
                 azureSubscriptionEndpoint: '$(azureSubscriptionEndpoint)'
                 azureContainerRegistry: '$(azureContainerRegistry)'
                 command: 'Push an image'
+
+    - stage: Deploy
+      displayName: 'Deploy Dev'
+      jobs:
+      - job: RunScripts
+        steps:
+            - task: AzureRmWebAppDeployment@4
+              displayName: 'Azure App Service Deploy: cltodoapp'
+              inputs:
+                azureSubscription: '$(azureSubscriptionEndpoint)'
+                appType: webAppContainer
+                WebAppName: cltodoapp
+                DockerNamespace: '$(azureContainerRegistry)'
+                DockerRepository: '$(azureContainerRepository)'
+                DockerImageTag: '$(Build.BuildId)'
+                AppSettings: '-CosmosDb__DatabaseName $(cosmosDbDatabase) -CosmosDb__ContainerName $(cosmosDbContainer) -CosmosDb__Account $(cosmosDbEndpoint) -CosmosDb__Key $(cosmosDbKey)'
