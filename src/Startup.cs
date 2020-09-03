@@ -7,6 +7,8 @@ using Serilog;
 using System;
 using System.IO;
 using System.Reflection;
+using TodoAppMicroservice.Services;
+using TodoAppMicroservice.Settings;
 
 namespace TodoAppMicroservice
 {
@@ -37,6 +39,11 @@ namespace TodoAppMicroservice
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
             });
+
+            services.AddSingleton<ITodoRepository, CosmosDbRepository>();
+
+            var cosmosDbSettings = Configuration.GetSection("CosmosDb");
+            services.Configure<CosmosDbSettings>(cosmosDbSettings);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
