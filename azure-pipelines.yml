@@ -52,18 +52,3 @@ stages:
                 azureSubscriptionEndpoint: '$(azureSubscriptionEndpoint)'
                 azureContainerRegistry: '$(azureContainerRegistry)'
                 command: 'Push an image'
-                
-    - stage: Deploy
-      displayName: 'Deploy Dev'
-      jobs:
-      - job: RunScripts
-        steps:
-            - task: AzureRmWebAppDeployment@4
-              displayName: 'Azure App Service Deploy: ethereumtransactionsearch'
-              inputs:
-                azureSubscription: '$(azureSubscriptionEndpoint)'
-                appType: webAppContainer
-                WebAppName: ethereumtransactionsearch
-                DockerNamespace: '$(azureContainerRegistry)'
-                DockerRepository: '$(azureContainerRepository)'
-                DockerImageTag: '$(Build.BuildId)'
