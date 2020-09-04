@@ -72,6 +72,30 @@ namespace TodoAppMicroservice.Controllers
             }
         }
 
+        [HttpPut, Route("/api/Todos/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResult), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UpdateTodo(Guid id, [FromBody]UpdateTodoRequest updateTodoRequest)
+        {
+            try
+            {
+                var todo = await _todoRepository.GetItemAsync(id.ToString());
+
+                todo.Name = updateTodoRequest.Name;
+                todo.Description = updateTodoRequest.Description;
+                todo.IsComplete = updateTodoRequest.IsComplete;
+
+                await _todoRepository.UpdateItemAsync(id.ToString(), todo);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception caught!");
+                return BadRequest(new ApiResult { Error = "An error has occured" });
+            }
+        }
+
         [HttpDelete, Route("/api/Todos/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResult), StatusCodes.Status400BadRequest)]
