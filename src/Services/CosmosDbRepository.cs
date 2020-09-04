@@ -21,7 +21,7 @@ namespace TodoAppMicroservice.Services
 
         public async Task AddItemAsync(Todo todo)
         {
-            await _container.CreateItemAsync<Todo>(todo, new PartitionKey(todo.id));
+            await _container.CreateItemAsync<Todo>(todo, new PartitionKey(todo.Id));
         }
 
         public async Task DeleteItemAsync(string id)
