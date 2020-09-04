@@ -72,5 +72,23 @@ namespace TodoAppMicroservice.Controllers
             }
         }
 
+        [HttpDelete, Route("/api/Todos/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResult), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> DeleteTodo(Guid id)
+        {
+            try
+            {
+                await _todoRepository.DeleteItemAsync(id.ToString());
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception caught!");
+                return BadRequest(new ApiResult { Error = "An error has occured" });
+            }
+        }
+
     }
 }
