@@ -58,7 +58,7 @@ namespace TodoAppMicroservice.Controllers
                     Id = Guid.NewGuid().ToString(),
                     Name = createTodoRequest.Name,
                     Description = createTodoRequest.Description,
-                    IsComplete = false
+                    IsComplete = createTodoRequest.IsComplete
                 };
 
                 await _todoRepository.AddItemAsync(todo);
