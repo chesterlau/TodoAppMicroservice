@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -7,6 +8,7 @@ using Serilog;
 using System;
 using System.IO;
 using System.Reflection;
+using TodoAppMicroservice.Models.Mappings;
 using TodoAppMicroservice.Services;
 using TodoAppMicroservice.Settings;
 
@@ -44,6 +46,8 @@ namespace TodoAppMicroservice
 
             var cosmosDbSettings = Configuration.GetSection("CosmosDb");
             services.Configure<CosmosDbSettings>(cosmosDbSettings);
+
+            services.AddAutoMapper(c => c.AddProfile<MappingProfile>(), typeof(Startup));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

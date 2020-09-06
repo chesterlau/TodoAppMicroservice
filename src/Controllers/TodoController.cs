@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -14,11 +15,13 @@ namespace TodoAppMicroservice.Controllers
     [ApiController]
     public class TodoController : Controller
     {
+        private readonly IMapper _mapper;
         private readonly ITodoRepository _todoRepository;
         private readonly ILogger<TodoController> _logger;
 
-        public TodoController(ITodoRepository todoRepository, ILogger<TodoController> logger)
+        public TodoController(IMapper mapper, ITodoRepository todoRepository, ILogger<TodoController> logger)
         {
+            _mapper = mapper;
             _todoRepository = todoRepository;
             _logger = logger;
         }
@@ -33,7 +36,7 @@ namespace TodoAppMicroservice.Controllers
                 var result = await _todoRepository.GetItemsAsync("SELECT * FROM c");
 
                 var response = new GetTodosResponse
-                { 
+                {
                     Todos = result
                 };
 
@@ -75,7 +78,7 @@ namespace TodoAppMicroservice.Controllers
         [HttpPut, Route("/api/Todos/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResult), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateTodo(Guid id, [FromBody]UpdateTodoRequest updateTodoRequest)
+        public async Task<IActionResult> UpdateTodo(Guid id, [FromBody] UpdateTodoRequest updateTodoRequest)
         {
             try
             {
@@ -104,6 +107,28 @@ namespace TodoAppMicroservice.Controllers
             try
             {
                 await _todoRepository.DeleteItemAsync(id.ToString());
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception caught!");
+                return BadRequest(new ApiResult { Error = "An error has occured" });
+            }
+        }
+
+        [HttpPatch, Route("/api/Todos/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResult), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UpdateTodo(Guid id, [FromBody] PatchTodoRequest patchTodoRequest)
+        {
+            try
+            {
+                var todo = await _todoRepository.GetItemAsync(id.ToString());
+
+                var result = _mapper.Map(patchTodoRequest, todo);
+
+                await _todoRepository.UpdateItemAsync(id.ToString(), result);
 
                 return Ok();
             }
