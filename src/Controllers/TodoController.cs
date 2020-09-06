@@ -33,6 +33,8 @@ namespace TodoAppMicroservice.Controllers
         {
             try
             {
+                _logger.LogInformation($"Retrieving a list of to-dos");
+
                 var result = await _todoRepository.GetItemsAsync("SELECT * FROM c");
 
                 var response = new GetTodosResponse
@@ -56,6 +58,8 @@ namespace TodoAppMicroservice.Controllers
         {
             try
             {
+                _logger.LogInformation($"Creating a new to-do");
+
                 Todo todo = new Todo
                 {
                     Id = Guid.NewGuid().ToString(),
@@ -82,6 +86,8 @@ namespace TodoAppMicroservice.Controllers
         {
             try
             {
+                _logger.LogInformation($"Updating exisitng to-do with id: {id.ToString()}");
+
                 var todo = await _todoRepository.GetItemAsync(id.ToString());
 
                 todo.Name = updateTodoRequest.Name;
@@ -106,6 +112,8 @@ namespace TodoAppMicroservice.Controllers
         {
             try
             {
+                _logger.LogInformation($"Deleting exisitng to-do with id: {id.ToString()}");
+
                 await _todoRepository.DeleteItemAsync(id.ToString());
 
                 return Ok();
@@ -120,10 +128,12 @@ namespace TodoAppMicroservice.Controllers
         [HttpPatch, Route("/api/Todos/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResult), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateTodo(Guid id, [FromBody] PatchTodoRequest patchTodoRequest)
+        public async Task<IActionResult> PatchTodo(Guid id, [FromBody] PatchTodoRequest patchTodoRequest)
         {
             try
             {
+                _logger.LogInformation($"Patching exisitng to-do with id: {id.ToString()}");
+
                 var todo = await _todoRepository.GetItemAsync(id.ToString());
 
                 var result = _mapper.Map(patchTodoRequest, todo);
