@@ -15,6 +15,8 @@ namespace TodoAppMicroservice.Models.Mappings
                 .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
                 .ForMember(dest => dest.IsComplete, opt => opt.Condition(src => src.IsComplete != null))
                 .ForMember(dest => dest.IsComplete, opt => opt.MapFrom(src => src.IsComplete));
+
+            CreateMap<Todo, GetTodoResponse>();
         }
     }
 }

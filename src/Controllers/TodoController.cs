@@ -51,6 +51,28 @@ namespace TodoAppMicroservice.Controllers
             }
         }
 
+        [HttpGet, Route("/api/Todos/{id}")]
+        [ProducesResponseType(typeof(GetTodoResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResult), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetTodo(Guid id)
+        {
+            try
+            {
+                _logger.LogInformation($"Retrieving to-do based on id: {id.ToString()}");
+
+                var todo = await _todoRepository.GetItemAsync(id.ToString());
+                
+                var response = _mapper.Map<GetTodoResponse>(todo);
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception caught!");
+                return BadRequest(new ApiResult { Error = "An error has occured" });
+            }
+        }
+
         [HttpPost, Route("/api/Todos")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResult), StatusCodes.Status400BadRequest)]
